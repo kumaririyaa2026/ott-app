@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Full-bleed video card matching the Figma reference: the video fills the
+    whole card and the title / description / Watch Now button / action icons
+    are all overlaid directly on top of it (over a bottom gradient), rather
+    than laid out below the video.
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="480dp"
+    android:background="@color/surface_dark"
+    android:clipToPadding="false"
+    android:clipChildren="false">
+
+    <androidx.media3.ui.PlayerView
+        android:id="@+id/player_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:use_controller="false"
+        app:resize_mode="zoom" />
+
+    <!-- Bottom gradient so title/desc/button read clearly over the video -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="230dp"
+        android:layout_gravity="bottom"
+        android:background="@drawable/bg_gradient_overlay" />
+
+    <!-- View count badge, top-right of the video -->
+    <TextView
+        android:id="@+id/text_views"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|end"
+        android:layout_margin="12dp"
+        android:background="@drawable/bg_views_badge"
+        android:drawablePadding="4dp"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="10dp"
+        android:paddingVertical="5dp"
+        android:textColor="@color/white"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        app:drawableStartCompat="@drawable/ic_views"
+        tools:text="22K" />
+
+    <!-- Right-side action icons overlaying the video, vertically centered -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end|center_vertical"
+        android:layout_marginEnd="10dp"
+        android:orientation="vertical"
+        android:gravity="center">
+
+        <ImageView
+            android:id="@+id/icon_like"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:padding="8dp"
+            android:src="@drawable/ic_like"
+            android:contentDescription="@null" />
+
+        <ImageView
+            android:id="@+id/icon_save"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="6dp"
+            android:padding="8dp"
+            android:src="@drawable/ic_save"
+            android:contentDescription="@null" />
+
+        <ImageView
+            android:id="@+id/icon_share"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="6dp"
+            android:padding="8dp"
+            android:src="@drawable/ic_share"
+            android:contentDescription="@null" />
+
+        <ImageView
+            android:id="@+id/icon_volume"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="6dp"
+            android:padding="8dp"
+            android:src="@drawable/ic_volume"
+            android:contentDescription="@null" />
+    </LinearLayout>
+
+    <!-- Title / description / Watch Now, overlaid on the bottom gradient -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="72dp"
+        android:layout_marginBottom="18dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/text_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:textSize="19sp"
+            android:textStyle="bold"
+            android:maxLines="1"
+            android:ellipsize="end"
+            tools:text="Breaking the Ice" />
+
+        <TextView
+            android:id="@+id/text_description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textColor="@color/text_secondary"
+            android:textSize="13sp"
+            android:maxLines="2"
+            android:ellipsize="end"
+            tools:text="Caroline Mills and Easton Cook are in a wave/lift of love in Breaking the Ice Movie..." />
+
+        <Button
+            android:id="@+id/button_watch_now"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:paddingHorizontal="24dp"
+            android:paddingVertical="8dp"
+            android:background="@drawable/bg_watch_now_button"
+            android:text="@string/watch_now"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+
+</FrameLayout>
