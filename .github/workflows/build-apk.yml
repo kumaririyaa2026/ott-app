@@ -24,37 +24,8 @@ jobs:
         with:
           gradle-version: '8.4'
 
-      - name: Show recognized projects
-        run: |
-          echo "::group::projects"
-          gradle projects 2>&1 | tee projects.txt
-          echo "::endgroup::"
-          while IFS= read -r line; do echo "::warning::PROJ: $line"; done < projects.txt
-
       - name: Build debug APK
-        run: gradle :app:assembleDebug --stacktrace 2>&1 | tee build.log
-
-      - name: Surface build log summary
-        if: always()
-        run: |
-          grep -E "^> Task|BUILD SUCCESSFUL|BUILD FAILED|error|Exception|FAILED|what went wrong" build.log | tail -60 | while IFS= read -r line; do
-            escaped=$(echo "$line" | sed 's/%/%25/g; s/\r/%0D/g; s/\n/%0A/g')
-            echo "::warning::$escaped"
-          done
-
-      - name: List build outputs
-        if: always()
-        run: |
-          echo "::group::apk search"
-          find app/build/outputs -type f 2>&1 | tee found.txt
-          echo "::endgroup::"
-          if [ -s found.txt ]; then
-            while IFS= read -r line; do echo "::warning::FOUND: $line"; done < found.txt
-          else
-            echo "::warning::No files at all under app/build/outputs"
-          fi
-          echo "::warning::assembleDebug task list:"
-          gradle tasks --group build 2>&1 | grep -i assemble | while IFS= read -r line; do echo "::warning::TASK: $line"; done
+        run: gradle :app:assembleDebug --stacktrace
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
