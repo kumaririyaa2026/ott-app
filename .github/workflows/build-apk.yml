@@ -36,7 +36,18 @@ jobs:
           done
 
       - name: List build outputs
-        run: find app/build/outputs -type f -name "*.apk" || echo "No APKs found"
+        if: always()
+        run: |
+          echo "::group::apk search"
+          find app/build/outputs -type f 2>&1 | tee found.txt
+          echo "::endgroup::"
+          if [ -s found.txt ]; then
+            while IFS= read -r line; do echo "::warning::FOUND: $line"; done < found.txt
+          else
+            echo "::warning::No files at all under app/build/outputs"
+          fi
+          echo "::warning::assembleDebug task list:"
+          gradle tasks --group build 2>&1 | grep -i assemble | while IFS= read -r line; do echo "::warning::TASK: $line"; done
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
