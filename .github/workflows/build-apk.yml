@@ -24,8 +24,15 @@ jobs:
         with:
           gradle-version: '8.4'
 
+      - name: Show recognized projects
+        run: |
+          echo "::group::projects"
+          gradle projects 2>&1 | tee projects.txt
+          echo "::endgroup::"
+          while IFS= read -r line; do echo "::warning::PROJ: $line"; done < projects.txt
+
       - name: Build debug APK
-        run: gradle assembleDebug --stacktrace 2>&1 | tee build.log
+        run: gradle :app:assembleDebug --stacktrace 2>&1 | tee build.log
 
       - name: Surface build errors as annotations
         if: failure()
