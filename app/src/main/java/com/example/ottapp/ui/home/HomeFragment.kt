@@ -7,10 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.example.ottapp.databinding.FragmentHomeBinding
 
-/**
- * Intentionally blank per the assignment brief - only the Explore screen is
- * evaluated.
- */
+// blank screen, not evaluated
 class HomeFragment : Fragment() {
 
     private var _binding: FragmentHomeBinding? = null

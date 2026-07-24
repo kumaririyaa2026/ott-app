@@ -1,10 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-    Full-bleed video card matching the Figma reference: the video fills the
-    whole card and the title / description / Watch Now button / action icons
-    are all overlaid directly on top of it (over a bottom gradient), rather
-    than laid out below the video.
--->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -21,14 +15,14 @@
         app:use_controller="false"
         app:resize_mode="zoom" />
 
-    <!-- Bottom gradient so title/desc/button read clearly over the video -->
+    <!-- gradient overlay -->
     <View
         android:layout_width="match_parent"
         android:layout_height="230dp"
         android:layout_gravity="bottom"
         android:background="@drawable/bg_gradient_overlay" />
 
-    <!-- View count badge, top-right of the video -->
+    <!-- view count -->
     <TextView
         android:id="@+id/text_views"
         android:layout_width="wrap_content"
@@ -46,7 +40,7 @@
         app:drawableStartCompat="@drawable/ic_views"
         tools:text="22K" />
 
-    <!-- Right-side action icons overlaying the video, vertically centered -->
+    <!-- action icons -->
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -91,7 +85,7 @@
             android:contentDescription="@null" />
     </LinearLayout>
 
-    <!-- Title / description / Watch Now, overlaid on the bottom gradient -->
+    <!-- title, description, watch now button -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

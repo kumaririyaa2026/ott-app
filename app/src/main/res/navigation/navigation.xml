@@ -5,12 +5,7 @@
     android:id="@+id/navigation"
     app:startDestination="@id/nav_explore">
 
-    <!--
-        Fragment ids intentionally match the menu_bottom.xml item ids
-        (nav_home / nav_explore / nav_profile) so that
-        NavigationUI.setupWithNavController(bottomNav, navController) wires
-        tab taps to these destinations automatically.
-    -->
+    <!-- ids match menu_bottom.xml item ids so bottom nav wires up automatically -->
 
     <fragment
         android:id="@+id/nav_home"

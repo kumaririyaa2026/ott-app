@@ -14,15 +14,8 @@ import com.example.ottapp.player.VideoPlayerManager
 import com.example.ottapp.viewmodel.ExploreViewModel
 import kotlin.math.abs
 
-/**
- * The only screen that is evaluated. Shows a vertically scrolling list of
- * videos, each with an inline Media3 (ExoPlayer) preview, title, 2-line
- * description, Watch Now button, and like/save/share/volume icons (UI only).
- *
- * Only one video plays at a time: a single shared [VideoPlayerManager] is
- * moved between rows as the user scrolls, always attaching to whichever
- * row is closest to the center of the screen.
- */
+// Main screen being evaluated. Shows a scrolling feed of video cards, each
+// with title/description/watch now button and like/save/share/volume icons.
 class ExploreFragment : Fragment() {
 
     private var _binding: FragmentExploreBinding? = null
@@ -49,9 +42,7 @@ class ExploreFragment : Fragment() {
 
         binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerView.adapter = adapter
-        // Video items are relatively tall/complex; disabling item change
-        // animations avoids player flicker when the list updates.
-        binding.recyclerView.itemAnimator = null
+        binding.recyclerView.itemAnimator = null // avoids flicker on the player views
 
         binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
@@ -61,8 +52,6 @@ class ExploreFragment : Fragment() {
 
         viewModel.videos.observe(viewLifecycleOwner) { videos ->
             adapter.submitList(videos) {
-                // Wait for the list (and its views) to actually be laid out
-                // before deciding which row to play.
                 binding.recyclerView.post { playMostVisibleItem() }
             }
         }
@@ -82,24 +71,21 @@ class ExploreFragment : Fragment() {
         playerManager?.pause()
     }
 
-    /**
-     * Finds the row closest to the vertical center of the RecyclerView and,
-     * if it isn't already playing, attaches the shared player to it.
-     */
+    // figures out which row is closest to the center of the screen and
+    // plays that one, so only one video plays at a time as you scroll
     private fun playMostVisibleItem() {
         val recyclerView = binding.recyclerView
         val layoutManager = recyclerView.layoutManager as? LinearLayoutManager ?: return
         if (recyclerView.childCount == 0) return
 
-        val recyclerViewCenterY = recyclerView.height / 2
-
+        val centerY = recyclerView.height / 2
         var closestPosition = RecyclerView.NO_POSITION
         var minDistance = Int.MAX_VALUE
 
         for (i in 0 until recyclerView.childCount) {
             val child = recyclerView.getChildAt(i)
             val childCenterY = (child.top + child.bottom) / 2
-            val distance = abs(childCenterY - recyclerViewCenterY)
+            val distance = abs(childCenterY - centerY)
             if (distance < minDistance) {
                 minDistance = distance
                 closestPosition = layoutManager.getPosition(child)

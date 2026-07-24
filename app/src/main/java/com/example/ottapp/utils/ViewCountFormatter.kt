@@ -1,9 +1,6 @@
 package com.example.ottapp.utils
 
-/**
- * Formats a raw view count (e.g. 24840) into a short display string
- * (e.g. "24.8K"), matching the view-count badge in the Figma reference.
- */
+// 24840 -> "24.8K", matches the view count badge in the design
 object ViewCountFormatter {
 
     fun format(views: Int): String = when {

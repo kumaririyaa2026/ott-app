@@ -9,15 +9,8 @@ import com.example.ottapp.data.model.VideoItem
 import com.example.ottapp.data.repository.VideoRepository
 import kotlinx.coroutines.launch
 
-/**
- * ViewModel for the Explore screen (MVVM). Holds and exposes the list of
- * videos as LiveData and survives configuration changes independently of
- * the Fragment lifecycle.
- *
- * Uses AndroidViewModel (rather than a plain ViewModel) purely so the
- * repository has an application Context available to read the bundled
- * dummy_response.json asset.
- */
+// AndroidViewModel so we have a Context for the repository to read
+// the dummy json asset
 class ExploreViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository = VideoRepository(application)

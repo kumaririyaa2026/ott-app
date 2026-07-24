@@ -10,18 +10,9 @@ import com.example.ottapp.data.model.VideoItem
 import com.example.ottapp.databinding.ItemVideoBinding
 import com.example.ottapp.utils.ViewCountFormatter
 
-/**
- * Displays each series/video row: title, a 2-line description, view count,
- * a "Watch Now" button, and UI-only action icons (like / save / share /
- * volume) as required by the brief.
- *
- * This adapter does NOT own any ExoPlayer instances itself - only one video
- * should play at a time across the whole list, so a single shared player is
- * managed by ExploreFragment via VideoPlayerManager, which attaches itself
- * to whichever row's [PlayerView] is currently most visible. Keeping that
- * logic out of the adapter/ViewHolder keeps this class focused purely on
- * binding data, per MVVM.
- */
+// Only binds data here. The actual video player is managed from
+// ExploreFragment (VideoPlayerManager) since only one row should be
+// playing at any time, not one player per item.
 class VideoAdapter : ListAdapter<VideoItem, VideoAdapter.VideoViewHolder>(DIFF_CALLBACK) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VideoViewHolder {
@@ -38,7 +29,6 @@ class VideoAdapter : ListAdapter<VideoItem, VideoAdapter.VideoViewHolder>(DIFF_C
     class VideoViewHolder(private val binding: ItemVideoBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        /** Exposed so ExploreFragment can attach the shared player to whichever row is visible. */
         val playerView: PlayerView
             get() = binding.playerView
 
@@ -46,8 +36,8 @@ class VideoAdapter : ListAdapter<VideoItem, VideoAdapter.VideoViewHolder>(DIFF_C
             binding.textTitle.text = item.title
             binding.textDescription.text = item.description
             binding.textViews.text = ViewCountFormatter.format(item.views)
-            // Icons and the Watch Now button are UI-only per the brief -
-            // no click behaviour is wired up.
+            // like/save/share/volume icons and watch now button are UI only,
+            // no click listeners needed
         }
     }
 

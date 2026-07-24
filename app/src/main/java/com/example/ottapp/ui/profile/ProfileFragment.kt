@@ -7,10 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.example.ottapp.databinding.FragmentProfileBinding
 
-/**
- * Intentionally blank per the assignment brief - only the Explore screen is
- * evaluated.
- */
+// blank screen, not evaluated
 class ProfileFragment : Fragment() {
 
     private var _binding: FragmentProfileBinding? = null

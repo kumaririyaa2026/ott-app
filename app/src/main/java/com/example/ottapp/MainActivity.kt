@@ -19,10 +19,8 @@ class MainActivity : AppCompatActivity() {
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         val navController = navHostFragment.navController
 
-        // Wires bottom nav tab taps to the matching destination in
-        // navigation.xml - the menu item ids and fragment ids match
-        // (nav_home / nav_explore / nav_profile), so this is all that's
-        // needed for navigation to work correctly.
+        // menu item ids match the fragment ids in navigation.xml so this
+        // handles switching tabs automatically
         binding.bottomNavigation.setupWithNavController(navController)
     }
 }
