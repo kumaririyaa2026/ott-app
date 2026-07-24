@@ -5,6 +5,7 @@ import android.widget.Toast
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
+import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 
@@ -25,23 +26,33 @@ class VideoPlayerManager(context: Context) {
 
     private val appContext = context.applicationContext
 
-    private val player: ExoPlayer = ExoPlayer.Builder(appContext).build().apply {
-        // Muted by default - the volume icon in the UI is UI-only per the brief.
-        volume = 0f
-        repeatMode = ExoPlayer.REPEAT_MODE_ALL
+    private val player: ExoPlayer = run {
+        // setEnableDecoderFallback lets ExoPlayer try an alternate decoder
+        // (e.g. a software one) if the device's preferred hardware decoder
+        // fails to initialize for a given video's codec profile - this is
+        // what fixes DECODER_INIT_FAILED on devices whose hardware decoder
+        // doesn't support these particular MP4s.
+        val renderersFactory = DefaultRenderersFactory(appContext)
+            .setEnableDecoderFallback(true)
 
-        // Surfaces playback errors (bad URL, network, unsupported codec, etc.)
-        // as a Toast instead of silently showing a black screen, so failures
-        // are easy to diagnose on a real device.
-        addListener(object : Player.Listener {
-            override fun onPlayerError(error: PlaybackException) {
-                Toast.makeText(
-                    appContext,
-                    "Video playback error: ${error.errorCodeName}",
-                    Toast.LENGTH_LONG
-                ).show()
-            }
-        })
+        ExoPlayer.Builder(appContext, renderersFactory).build().apply {
+            // Muted by default - the volume icon in the UI is UI-only per the brief.
+            volume = 0f
+            repeatMode = ExoPlayer.REPEAT_MODE_ALL
+
+            // Surfaces playback errors (bad URL, network, unsupported codec, etc.)
+            // as a Toast instead of silently showing a black screen, so failures
+            // are easy to diagnose on a real device.
+            addListener(object : Player.Listener {
+                override fun onPlayerError(error: PlaybackException) {
+                    Toast.makeText(
+                        appContext,
+                        "Video playback error: ${error.errorCodeName}",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            })
+        }
     }
 
     private var attachedPlayerView: PlayerView? = null
