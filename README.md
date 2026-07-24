@@ -1,111 +1,183 @@
-# OTTApp — Android OTT Assignment
+# OTTApp — Android OTT Interview Assignment
 
-A simple Android OTT app with Bottom Navigation (Home / Explore / Profile). Only the
-**Explore** screen is implemented in full, per the brief — Home and Profile are
+## Project Overview
+
+A simple Android OTT (over-the-top streaming) app built for the Android Developer
+interview assignment. The app has Bottom Navigation with three tabs — **Home**,
+**Explore**, and **Profile** — but only **Explore** is implemented in full, since
+that's the only screen being evaluated per the brief. Home and Profile are
 intentionally blank placeholder screens.
 
-## Tech Stack
+The Explore screen shows a vertically scrolling, full-bleed feed of video rows
+(title, description, view count, Watch Now button, and like/save/share/volume
+icons), each with an inline autoplaying Media3 (ExoPlayer) video preview, built
+against the dummy JSON supplied in the brief.
 
-- Kotlin
-- XML layouts (View system, not Compose)
-- MVVM architecture
-- Media3 (ExoPlayer) for inline video playback
-- Glide (available for thumbnail loading, if extended later)
-- Kotlin Coroutines + LiveData
+## Features
 
-## Project Structure
+- Bottom Navigation (Home / Explore / Profile) using the Navigation Component
+- Explore feed: full-bleed video cards with an autoplaying, looping, muted
+  inline video preview (Media3 / ExoPlayer)
+- Only one video plays at a time — as you scroll, the shared player moves to
+  whichever row is currently most visible, and playback pauses automatically
+  when the app is backgrounded or the tab isn't visible
+- Title, 2-line description, formatted view count (e.g. "24.8K"), Watch Now
+  button, and like/save/share/volume icons (all UI-only per the brief)
+- MVVM architecture with a Repository layer and LiveData
+- Dummy JSON bundled locally as a project asset and parsed with Gson
+- Efficient list updates via `ListAdapter` + `DiffUtil`
+
+## Architecture
+
+```
+Repository  →  ViewModel  →  Fragment  →  RecyclerView Adapter
+```
+
+- **Repository** (`VideoRepository`) is the single source of truth for video
+  data. It reads and parses the bundled dummy JSON today, but is written as a
+  suspend function returning the same shape a real network call would, so
+  swapping in a live endpoint later doesn't require any change to the
+  ViewModel or UI.
+- **ViewModel** (`ExploreViewModel`) asks the repository for data and exposes
+  it as `LiveData<List<VideoItem>>`, surviving configuration changes
+  independently of the Fragment.
+- **Fragment** (`ExploreFragment`) observes that LiveData, submits it to the
+  adapter, and owns the single shared `VideoPlayerManager` used to decide
+  which row's video is currently playing.
+- **Adapter** (`VideoAdapter`) only binds data to views — it does not own any
+  ExoPlayer instances or contain business logic, keeping responsibilities
+  cleanly separated.
+
+## Libraries Used
+
+| Library | Purpose |
+|---|---|
+| AndroidX Core / AppCompat | Base Android platform support |
+| Material Components | Bottom navigation, buttons, theming |
+| ConstraintLayout | Screen layouts |
+| Navigation (fragment-ktx / ui-ktx) | Bottom nav ↔ fragment wiring |
+| Lifecycle (ViewModel / LiveData) | MVVM state holders |
+| RecyclerView | Explore feed list |
+| Media3 (ExoPlayer + UI) | Inline video playback |
+| Gson | Parsing the bundled dummy JSON |
+| Kotlin Coroutines | Repository/ViewModel async calls |
+
+## Folder Structure
 
 ```
 app/src/main/java/com/example/ottapp/
-├── MainActivity.kt              # Hosts BottomNavigationView + fragment swapping
-├── home/HomeFragment.kt         # Blank screen
-├── profile/ProfileFragment.kt   # Blank screen
-├── explore/
-│   ├── ExploreFragment.kt       # Main evaluated screen
-│   ├── ExploreViewModel.kt      # Exposes video list as LiveData
-│   └── VideoAdapter.kt          # RecyclerView adapter, owns one ExoPlayer per item
-└── data/
-    ├── model/VideoItem.kt       # Domain model (matches dummy JSON fields)
-    ├── model/ApiResponse.kt     # Mirrors the { success, message, data.rows } envelope
-    ├── local/DummyData.kt       # Hard-coded copy of the dummy JSON from the brief
-    └── repository/VideoRepository.kt  # Single data-access point used by the ViewModel
+├── MainActivity.kt                    # Hosts BottomNavigationView + NavHostFragment
+├── data/
+│   ├── model/
+│   │   ├── VideoItem.kt               # Domain model (matches dummy JSON fields)
+│   │   └── ApiResponse.kt             # Mirrors { success, message, data.rows }
+│   ├── local/
+│   │   └── DummyData.kt               # Reads + Gson-parses assets/dummy_response.json
+│   └── repository/
+│       └── VideoRepository.kt         # Single data-access point used by the ViewModel
+├── viewmodel/
+│   └── ExploreViewModel.kt            # Exposes video list as LiveData
+├── ui/
+│   ├── home/HomeFragment.kt           # Blank screen (not evaluated)
+│   ├── explore/ExploreFragment.kt     # Main evaluated screen
+│   └── profile/ProfileFragment.kt     # Blank screen (not evaluated)
+├── adapter/
+│   └── VideoAdapter.kt                # ListAdapter + DiffUtil, binds data only
+├── player/
+│   └── VideoPlayerManager.kt          # Single shared ExoPlayer used across the feed
+└── utils/
+    └── ViewCountFormatter.kt          # "24840" -> "24.8K" formatting helper
+
+app/src/main/res/
+├── layout/          # activity_main, fragment_home/explore/profile, item_video
+├── navigation/       # navigation.xml (nav graph: home / explore / profile)
+├── menu/            # menu_bottom.xml (bottom nav items)
+├── drawable/        # icons + gradient/badge/button backgrounds
+├── values/          # strings, colors, themes
+└── assets/dummy_response.json   # Bundled dummy JSON, parsed via Gson
 ```
 
-## How the Explore screen works
-
-- `ExploreViewModel` asks `VideoRepository` (a `suspend fun`) for the list of videos on
-  init and exposes it via `LiveData<List<VideoItem>>`.
-- `VideoRepository` currently returns `DummyData.getVideoList()`, which is a literal
-  Kotlin copy of the dummy JSON payload from the assignment (same `rows` list, same
-  fields). It's written as a suspend function returning the same shape a real Retrofit
-  call would return, so swapping in a live network call later only means changing the
-  inside of `VideoRepository.getVideos()` — the ViewModel and UI don't need to change.
-- `ExploreFragment` observes the LiveData and submits it to a `ListAdapter`
-  (`VideoAdapter`) shown in a `RecyclerView`.
-- Each row (`item_video.xml`) shows:
-  - An inline `androidx.media3.ui.PlayerView` playing the `cover_video_raw` MP4 URL
-    (looped, muted by default, controller hidden — auto-plays like a social feed
-    preview).
-  - Title (1 line, truncated)
-  - Description (2 lines, truncated)
-  - "Watch Now" button
-  - Like / Save / Share icons overlaid top-right of the video
-  - Volume icon overlaid bottom-right of the video
-  - None of the icons or the Watch Now button have click behaviour wired up — this
-    matches the brief, which asks for **UI only** for these elements.
-- `VideoAdapter` creates one `ExoPlayer` instance per bound view holder and releases it
-  in `onViewRecycled` / `onFailedToRecycleView`, so scrolling through a long list does
-  not leak players.
-
-## Project Setup Instructions
+## Project Setup / Build Instructions
 
 1. Open the `OTTApp/` folder in Android Studio (**Open an existing project**, not
    "Import").
-2. Let Android Studio sync Gradle. On first open it will prompt to regenerate the
-   Gradle wrapper JAR — accept this (or run `gradle wrapper` from the terminal if you
-   have Gradle installed locally); the wrapper JAR binary itself is not checked into
-   this submission.
-3. Ensure you have an internet connection on first sync (Gradle needs to download
-   dependencies) and on first run (ExoPlayer needs to stream the MP4 URLs from
-   `cover_video_raw`).
-4. Run on an emulator or device with **minSdk 24** or higher.
-5. The app opens directly on the **Explore** tab since that's the screen being
-   evaluated; Home and Profile are reachable via the bottom navigation and show a
-   simple placeholder label.
+2. Let Android Studio sync Gradle — on first sync it needs an internet
+   connection to download dependencies.
+3. Run on an emulator or physical device with **minSdk 24** or higher.
+   An internet connection is also needed at runtime, since ExoPlayer streams
+   the MP4 files directly from the `cover_video_raw` URLs in the JSON.
+4. The app opens directly on the **Explore** tab (set as the nav graph's
+   start destination) since that's the screen being evaluated; Home and
+   Profile are reachable via the bottom navigation and show a simple
+   placeholder screen.
 
-### Versions used
+### Versions Used
 
-- Android Studio: Iguana / Koala or later (any recent stable release with AGP 8.2+
-  support)
-- Android Gradle Plugin (AGP): 8.2.2
-- Gradle: 8.4
-- Kotlin: 1.9.22
-- compileSdk / targetSdk: 34
-- minSdk: 24
+- **Android Studio**: Iguana / Koala or later (any recent stable release with
+  AGP 8.2+ support)
+- **Android Gradle Plugin (AGP)**: 8.2.2
+- **Gradle**: 8.4
+- **Kotlin**: 1.9.22
+- **compileSdk / targetSdk**: 34
+- **minSdk**: 24
+
+## How to Generate the APK
+
+- **From Android Studio**: **Build → Build Bundle(s) / APK(s) → Build APK(s)**.
+  The debug APK is written to `app/build/outputs/apk/debug/app-debug.apk`.
+- **From the command line**: `./gradlew assembleDebug` (debug) or
+  `./gradlew assembleRelease` (release, unsigned unless a signing config is
+  added).
+- **Via CI**: this repo includes a GitHub Actions workflow
+  (`.github/workflows/build-apk.yml`) that builds the debug APK automatically
+  on every push to `main` and uploads it as a downloadable build artifact —
+  check the **Actions** tab on GitHub.
+
+## What Should Be Submitted
+
+- This repository (source code, README, Gradle files)
+- The generated debug APK (from the CI artifact, or built locally as above)
 
 ## Assumptions Made
 
-- **No functionality behind icons/button**: Like, Save, Share, and Volume icons and the
-  Watch Now button are static UI elements only, as explicitly stated in the brief. They
-  are wired up visually (overlaid on the video, positioned per the Figma reference) but
-  have no `OnClickListener` attached.
-- **Dummy data is local, not fetched over HTTP**: The brief provides a fixed JSON
-  payload rather than a live endpoint to call, so it's embedded as a Kotlin object
-  (`DummyData`) instead of being fetched via Retrofit. The repository layer is
-  structured so a real API call could replace this with no changes needed elsewhere.
-- **Autoplay + loop + muted**: Since the brief doesn't specify playback behaviour
-  beyond "MP4 video using Media3," each visible video autoplays on bind, loops
-  (`REPEAT_MODE_ALL`), and starts muted (`volume = 0f`) — this is standard behaviour
-  for social/OTT-style feed previews and avoids multiple overlapping audio tracks
-  playing at once as the user scrolls. The volume icon is present as UI only, per the
-  brief, so this default isn't user-togglable in this build.
-- **XML over Compose**: The brief allows either; XML + ViewBinding was chosen for
-  faster, more predictable integration with `androidx.media3.ui.PlayerView` (Compose
-  would need an `AndroidView` wrapper around the same `PlayerView` either way).
-  Migrating to Compose is a mechanical follow-up if preferred.
-- **Home/Profile are blank on purpose**: Only Explore is evaluated per the brief, so
-  these two fragments just render a centered label and nothing else.
-- **No APK included**: Only source code is included in this submission; the project
-  can be built and an APK generated via Android Studio (**Build > Build Bundle(s) /
-  APK(s) > Build APK(s)**) or `./gradlew assembleDebug` once the Gradle wrapper is
-  regenerated.
+- **No functionality behind icons/button**: Like, Save, Share, and Volume icons
+  and the Watch Now button are static UI elements only, as explicitly stated in
+  the brief. They're positioned per the Figma reference but have no
+  `OnClickListener` attached.
+- **Dummy data is bundled locally, not fetched over HTTP**: The brief provides
+  a fixed JSON payload rather than a live endpoint, so it's bundled as
+  `assets/dummy_response.json` and parsed with Gson, rather than fetched via
+  Retrofit. The repository layer is structured so a real API call could
+  replace this with no changes needed elsewhere.
+- **Autoplay + loop + muted, one at a time**: Since the brief doesn't specify
+  playback behaviour beyond "MP4 video using Media3," the currently-visible
+  video autoplays, loops (`REPEAT_MODE_ALL`), and starts muted (`volume = 0f`).
+  Only one video plays at a time — a single shared `ExoPlayer` is moved
+  between rows based on scroll position, which also keeps memory/CPU usage
+  low and avoids multiple overlapping audio tracks.
+- **XML over Compose**: The brief for this build required XML + ViewBinding
+  (not Jetpack Compose), which also integrates directly with
+  `androidx.media3.ui.PlayerView` without an `AndroidView` wrapper.
+- **Home/Profile are blank on purpose**: Only Explore is evaluated per the
+  brief, so these two fragments render nothing but their layout shell.
+- **No coroutines Flow / Paging / DI framework**: Kept intentionally simple
+  (LiveData + suspend functions, no Hilt/Koin) to match a straightforward,
+  interview-appropriate scope rather than over-engineering the solution.
+
+## Screenshots
+
+_Add screenshots of the running Explore screen here before submitting, e.g.:_
+
+```
+docs/screenshot_explore.png
+```
+
+## Future Improvements
+
+- Replace the bundled dummy JSON with a real Retrofit-backed network call
+  (the repository is already shaped to make this a drop-in change)
+- Add pagination for longer video lists
+- Wire up real click behaviour for like/save/share and the Watch Now button
+- Add unit tests for `VideoRepository` / `ExploreViewModel` and UI tests for
+  `ExploreFragment`
+- Add a signing config so CI can also produce a signed release APK

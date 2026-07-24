@@ -1,4 +1,4 @@
-package com.example.ottapp.profile
+package com.example.ottapp.ui.profile
 
 import android.os.Bundle
 import android.view.LayoutInflater

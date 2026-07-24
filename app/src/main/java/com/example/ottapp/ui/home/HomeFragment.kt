@@ -1,4 +1,4 @@
-package com.example.ottapp.home
+package com.example.ottapp.ui.home
 
 import android.os.Bundle
 import android.view.LayoutInflater

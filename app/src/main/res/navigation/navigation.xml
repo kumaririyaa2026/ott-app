@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/navigation"
+    app:startDestination="@id/nav_explore">
+
+    <!--
+        Fragment ids intentionally match the menu_bottom.xml item ids
+        (nav_home / nav_explore / nav_profile) so that
+        NavigationUI.setupWithNavController(bottomNav, navController) wires
+        tab taps to these destinations automatically.
+    -->
+
+    <fragment
+        android:id="@+id/nav_home"
+        android:name="com.example.ottapp.ui.home.HomeFragment"
+        android:label="Home"
+        tools:layout="@layout/fragment_home" />
+
+    <fragment
+        android:id="@+id/nav_explore"
+        android:name="com.example.ottapp.ui.explore.ExploreFragment"
+        android:label="Explore"
+        tools:layout="@layout/fragment_explore" />
+
+    <fragment
+        android:id="@+id/nav_profile"
+        android:name="com.example.ottapp.ui.profile.ProfileFragment"
+        android:label="Profile"
+        tools:layout="@layout/fragment_profile" />
+
+</navigation>
