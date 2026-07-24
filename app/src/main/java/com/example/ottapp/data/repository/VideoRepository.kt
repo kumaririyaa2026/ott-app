@@ -3,7 +3,9 @@ package com.example.ottapp.data.repository
 import android.content.Context
 import com.example.ottapp.data.local.DummyData
 import com.example.ottapp.data.model.VideoItem
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 
 /**
  * Single source of truth for video/series data used by the Explore screen.
@@ -17,9 +19,9 @@ import kotlinx.coroutines.delay
  */
 class VideoRepository(private val context: Context) {
 
-    suspend fun getVideos(): List<VideoItem> {
+    suspend fun getVideos(): List<VideoItem> = withContext(Dispatchers.IO) {
         // Simulated network latency so the loading state is visible.
         delay(400)
-        return DummyData.getVideoList(context)
+        DummyData.getVideoList(context)
     }
 }

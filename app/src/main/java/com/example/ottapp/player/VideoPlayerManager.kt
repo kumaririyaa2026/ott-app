@@ -1,7 +1,10 @@
 package com.example.ottapp.player
 
 import android.content.Context
+import android.widget.Toast
 import androidx.media3.common.MediaItem
+import androidx.media3.common.PlaybackException
+import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 
@@ -20,10 +23,25 @@ import androidx.media3.ui.PlayerView
  */
 class VideoPlayerManager(context: Context) {
 
-    private val player: ExoPlayer = ExoPlayer.Builder(context.applicationContext).build().apply {
+    private val appContext = context.applicationContext
+
+    private val player: ExoPlayer = ExoPlayer.Builder(appContext).build().apply {
         // Muted by default - the volume icon in the UI is UI-only per the brief.
         volume = 0f
         repeatMode = ExoPlayer.REPEAT_MODE_ALL
+
+        // Surfaces playback errors (bad URL, network, unsupported codec, etc.)
+        // as a Toast instead of silently showing a black screen, so failures
+        // are easy to diagnose on a real device.
+        addListener(object : Player.Listener {
+            override fun onPlayerError(error: PlaybackException) {
+                Toast.makeText(
+                    appContext,
+                    "Video playback error: ${error.errorCodeName}",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        })
     }
 
     private var attachedPlayerView: PlayerView? = null
